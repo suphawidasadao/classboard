@@ -19,7 +19,7 @@ export async function POST(req) {
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
-    const passwordResetExpires = Date.now() + 3600000; // 1 ชั่วโมง
+    const passwordResetExpires = Date.now() + 3600000;
 
     existingUser.resetToken = passwordResetToken;
     existingUser.resetTokenExpiry = passwordResetExpires;
