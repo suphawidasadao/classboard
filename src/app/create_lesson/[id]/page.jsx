@@ -253,7 +253,7 @@ export default function CreateLessonsPage() {
               onChange={(e) => setSubject(e.target.value)}
             >
               <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-              <option value="ภาษาไทย">ภาษาไทย</option>
+              <option value="ภาษาไทย">วิทยาศาสตร์</option>
               <option value="คณิตศาสตร์">คณิตศาสตร์</option>
             </select>
             <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500">
