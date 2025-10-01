@@ -6,6 +6,7 @@ import Navbar from "../../../components/Navbar";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
 
 function Loginpage() {
   const [email, setEmail] = useState("");
@@ -62,7 +63,7 @@ function Loginpage() {
     <div className="overflow-hidden h-screen">
       <div className="text-sm">
         <Navbar />
-        <div className="bg-[#2e003e] flex items-start justify-center px-4 py-44 overflow-hidden">
+        <div className="bg-[#2e003e] flex items-start justify-center px-4 py-56 overflow-hidden">
           <div className="bg-white relative z-10 rounded-xl shadow-lg flex flex-col md:flex-row w-full max-w-[750px] overflow-hidden">
             <div className="w-full md:w-2/3 p-10">
               <h2 className="text-xl font-semibold mb-6">เข้าสู่ระบบ ClassBoard</h2>
@@ -97,7 +98,7 @@ function Loginpage() {
               <div className="space-y-2">
                 <button className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-100" onClick={() => { signIn("google"); }}>
                   <span className="flex items-center">ดำเนินการต่อด้วย Google</span>
-                  <span className="text-base">→</span>
+                  <span className="text-2xl"><FcGoogle /></span>
                 </button>
               </div>
               <p className="text-sm text-center mt-8">
