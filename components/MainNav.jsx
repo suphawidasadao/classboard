@@ -9,7 +9,7 @@ export default function MainNav() {
     const { data: session, status } = useSession();
 
     return (
-        <nav className="bg-white w-full px-10 border-b border-gray-300">
+        <nav className="bg-white w-full px-10 border-b border-gray-300 shadow-sm">
             <div className="max-w-screen flex justify-between items-center px-8 py-4 text-white">
                 <div className="relative w-28 h-10">
                     <Image
