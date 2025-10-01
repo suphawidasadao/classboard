@@ -5,7 +5,6 @@ export async function GET() {
   await connectMongoDB();
 
   try {
-    // ดึงบทเรียนที่ status เป็น approved, rejected, หรือ pending (ยกเว้น draft)
     const lessons = await Lesson.find({
       status: { $in: ["approved", "rejected", "pending"] }
     }).sort({ createdAt: -1 });
