@@ -53,7 +53,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ✅ แก้ตรงนี้ ใส่ Suspense ครอบ AdminTabs */}
       <Suspense fallback={<div>Loading tabs...</div>}>
         <AdminTabs onTabChange={(tab) => setActiveTab(tab)} />
       </Suspense>
