@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import AdminLayout from '../../../../components/AdminLayout';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
@@ -53,8 +53,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <AdminTabs onTabChange={(tab) => setActiveTab(tab)} />
+      {/* ✅ แก้ตรงนี้ ใส่ Suspense ครอบ AdminTabs */}
+      <Suspense fallback={<div>Loading tabs...</div>}>
+        <AdminTabs onTabChange={(tab) => setActiveTab(tab)} />
+      </Suspense>
 
       {/* Lesson Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
