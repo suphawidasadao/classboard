@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
 
 function RegisterPage() {
 
@@ -29,7 +30,7 @@ function RegisterPage() {
     e.preventDefault();
 
     if (!email || !password) {
-      setError("Please complete all inputs.");
+      setError("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
 
@@ -45,7 +46,7 @@ function RegisterPage() {
 
       const { user } = await resCheckUser.json();
       if (user) {
-        setError("User already exists!");
+        setError("อีเมลนี้ถูกใช้งานแล้ว!");
         return;
       }
 
@@ -85,7 +86,7 @@ function RegisterPage() {
     <div className="overflow-hidden h-screen">
       <div className="text-sm">
         <Navbar />
-        <div className="bg-gradient-to-b bg-[#2e003e] flex items-start justify-center px-4 py-44">
+        <div className="bg-gradient-to-b bg-[#2e003e] flex items-start justify-center px-4 py-56">
           <div className="bg-white relative z-10 rounded-xl shadow-lg flex flex-col md:flex-row w-full max-w-[750px] overflow-hidden">
 
             <div className="w-full md:w-2/3 p-10">
@@ -120,7 +121,7 @@ function RegisterPage() {
               <div className="space-y-2">
                 <button className="w-full flex justify-between items-center px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-100" onClick={() => { signIn("google"); }}>
                   <span className="flex items-center">ดำเนินการต่อด้วย Google</span>
-                  <span className="text-base">→</span>
+                  <span className="text-2xl"><FcGoogle /></span>
                 </button>
               </div>
 
