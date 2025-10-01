@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="h-screen overflow-hidden">
       <Navbar />
-      <div className="bg-gradient-to-b bg-[#2e003e] flex items-center justify-center px-4 py-66">
+      <div className="bg-gradient-to-b bg-[#2e003e] flex items-center justify-center px-4 py-80">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Email</h2>
           <form onSubmit={handleSubmit}>
