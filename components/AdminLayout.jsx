@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, useRef } from 'react';
-import { FaUser, FaBookOpen, FaChartBar, FaPlus } from 'react-icons/fa';
+import React, { useState, useRef, useEffect } from 'react';
+import { FaUser, FaBookOpen, FaChartBar } from 'react-icons/fa';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,17 @@ export default function AdminLayout({ children, activeViewProp }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const profileImage = '/default-profile.png';
-  const [statsDropdownOpen, setStatsDropdownOpen] = useState(false);
+
+  // ปิด dropdown เวลาคลิกนอก
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="flex font-sans h-screen">
@@ -33,13 +43,14 @@ export default function AdminLayout({ children, activeViewProp }) {
           onClick={() => router.push('/admin/create_lesson')}
           className="w-full bg-[#2e003ee3] hover:bg-[#552c62] text-white py-2 rounded flex items-center justify-center"
         >
-          
           <span>+ สร้างบทเรียน</span>
         </button>
 
+        {/* Sidebar Menu */}
         <div
-          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${activeViewProp === 'dashboard' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
-            }`}
+          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${
+            activeView === 'dashboard' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
+          }`}
           onClick={() => {
             setActiveView('dashboard');
             router.push('/admin/admin_dashboard');
@@ -50,8 +61,9 @@ export default function AdminLayout({ children, activeViewProp }) {
         </div>
 
         <div
-          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${activeViewProp === 'approval' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
-            }`}
+          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${
+            activeView === 'approval' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
+          }`}
           onClick={() => {
             setActiveView('approval');
             router.push('/admin/approval');
@@ -62,8 +74,9 @@ export default function AdminLayout({ children, activeViewProp }) {
         </div>
 
         <div
-          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${activeViewProp === 'stats' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
-            }`}
+          className={`flex items-center gap-2 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-100 ${
+            activeView === 'stats' ? 'font-semibold bg-white text-[#2e003ee3]' : 'text-gray-700'
+          }`}
           onClick={() => {
             setActiveView('stats');
             router.push('/admin/stats');
@@ -72,7 +85,6 @@ export default function AdminLayout({ children, activeViewProp }) {
           <FaChartBar className="text-lg" />
           <span className="text-sm">สถิติบทเรียน</span>
         </div>
-
       </div>
 
       {/* Main content */}
@@ -116,7 +128,6 @@ export default function AdminLayout({ children, activeViewProp }) {
           {children}
         </div>
       </div>
-
     </div>
   );
 }
