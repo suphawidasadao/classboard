@@ -12,6 +12,13 @@ export async function POST(req) {
       throw new Error("❌ email และ password ต้องเป็น String");
     }
 
+    if (password.length < 8) {
+      return NextResponse.json(
+        { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" },
+        { status: 400 }
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await connectMongoDB();
 
