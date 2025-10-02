@@ -312,7 +312,7 @@ export default function EditLessonsPage() {
               onChange={(e) => setSubject(e.target.value)}
             >
               <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-              <option value="ภาษาไทย">ภาษาไทย</option>
+              <option value="ภาษาไทย">วิทยาศาสตร์</option>
               <option value="คณิตศาสตร์">คณิตศาสตร์</option>
             </select>
             <div className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500">
@@ -331,7 +331,7 @@ export default function EditLessonsPage() {
               onClick={saveToBackend}
               className="flex items-center gap-2 bg-[#2e003e] text-white px-4 py-2 rounded hover:bg-[#48065e] transition"
             >
-              <BiSend className="text-lg" /> ส่งตรวจ
+              <BiSend className="text-lg" /> เผยแพร่
             </button>
           </div>
         </div>
