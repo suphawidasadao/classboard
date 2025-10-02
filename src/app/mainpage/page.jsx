@@ -33,7 +33,15 @@ export default function ClassBoardPage() {
     });
   };
 
-  const subjects = [...new Set(lessons.map((l) => l.subject))];
+  // ดึง subject ทั้งหมด
+  let subjects = [...new Set(lessons.map((l) => l.subject))];
+
+  // จัดเรียงให้ภาษาอังกฤษอยู่บนสุด
+  subjects.sort((a, b) => {
+    if (a.toLowerCase() === "ภาษาอังกฤษ") return -1;
+    if (b.toLowerCase() === "ภาษาอังกฤษ") return 1;
+    return a.localeCompare(b, "th");
+  });
 
   return (
     <div className="min-h-screen bg-[#f2f2f2] font-sans text-gray-800">
@@ -49,37 +57,42 @@ export default function ClassBoardPage() {
                   <h2 className="text-base font-semibold text-gray-800">{subject}</h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                    {lessonsBySubject.map((lesson, lIdx) => (
-                      <Link
-                        key={lIdx}
-                        href={`/mainlessons/${lesson._id}`}
-                        className="bg-white p-4 rounded-lg shadow-sm flex flex-col justify-between hover:shadow-md transition"
-                      >
-                        <img
-                          src={
-                            lesson.lessons?.[0]?.coverImage ||
-                            "https://png.pngtree.com/thumb_back/fh260/background/20221129/pngtree-english-college-skills-english-photo-image_2609615.jpg"
-                          }
-                          alt="Lesson Cover"
-                          className="w-full h-40 rounded-xl object-cover"
-                        />
+                    {lessonsBySubject.map((lesson, lIdx) => {
+                      // หา coverImage (รองรับทั้งสองกรณี)
+                      const coverImage =
+                        lesson.coverImage ||
+                        lesson.lessons?.[0]?.coverImage ||
+                        "https://png.pngtree.com/thumb_back/fh260/background/20221129/pngtree-english-college-skills-english-photo-image_2609615.jpg";
 
-                        <div className="text-left text-base font-medium mt-2 truncate">
-                          {lesson.lessons?.[0]?.title || lesson.title}
-                        </div>
+                      return (
+                        <Link
+                          key={lIdx}
+                          href={`/mainlessons/${lesson._id}`}
+                          className="bg-white p-4 rounded-lg shadow-sm flex flex-col justify-between hover:shadow-md transition"
+                        >
+                          <img
+                            src={coverImage}
+                            alt="Lesson Cover"
+                            className="w-full h-52 rounded-xl object-cover"
+                          />
 
-                        <div className="flex justify-between text-sm text-gray-700 mt-2">
-                          <span className="truncate">{lesson.subject}</span>
-                          <span className="text-purple-700 truncate">
-                            {formatDate(lesson.createdAt)}
-                          </span>
-                        </div>
+                          <div className="text-left text-base font-medium mt-2 truncate">
+                            {lesson.lessons?.[0]?.title || lesson.title}
+                          </div>
 
-                        <div className="text-xs text-gray-500 mt-1">
-                          โดย {lesson.creator?.split("@")[0]}
-                        </div>
-                      </Link>
-                    ))}
+                          <div className="flex justify-between text-sm text-gray-700 mt-2">
+                            <span className="truncate">{lesson.subject}</span>
+                            <span className="text-purple-700 truncate">
+                              {formatDate(lesson.createdAt)}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-gray-500 mt-1">
+                            โดย {lesson.creator?.split("@")[0]}
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               );
