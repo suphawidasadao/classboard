@@ -86,7 +86,7 @@ function RegisterPage() {
     <div className="overflow-hidden h-screen">
       <div className="text-sm">
         <Navbar />
-        <div className="bg-gradient-to-b bg-[#2e003e] flex items-start justify-center px-4 py-56">
+        <div className="bg-gradient-to-b bg-[#2e003e] flex items-start justify-center px-4 py-48">
           <div className="bg-white relative z-10 rounded-xl shadow-lg flex flex-col md:flex-row w-full max-w-[750px] overflow-hidden">
 
             <div className="w-full md:w-2/3 p-10">
