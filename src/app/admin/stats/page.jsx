@@ -123,7 +123,12 @@ export default function Stats() {
     setSelectedUnit(unitList[0] || '');
   }, [selectedLesson, selectedSubject, selectedCreator, attempts]);
 
-  if (loading) return <p className="p-6 text-gray-500 text-center">กำลังโหลดสถิติ...</p>;
+  if (loading)
+  return (
+    <div className="flex items-center justify-center h-screen bg-[#f2f2f2]">
+      <div className="w-12 h-12 border-4 border-gray-300 border-t-[#2e003e] rounded-full animate-spin"></div>
+    </div>
+  );
 
   // กรอง attempts ตาม dropdown (รวมทุกเงื่อนไข)
   const filteredAttempts = attempts.filter(a => {
