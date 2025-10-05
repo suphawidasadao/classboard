@@ -1,26 +1,26 @@
 "use client";
-
+ 
 import { useEffect, useState, Fragment } from "react";
 import { useSession } from "next-auth/react";
-import SideLayout from "../../../components/SideLayout";
-
+import MainNav from "../../../components/MainNav";
+ 
 export default function ActivityPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ attempts: [] });
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [subjects, setSubjects] = useState([]);
-
+ 
   useEffect(() => {
     if (!session?.user) return;
-
+ 
     const fetchActivity = async () => {
       setLoading(true);
       try {
         const res = await fetch("/api/activity");
         const data = await res.json();
         setStats(data);
-
+ 
         const uniqueSubjects = Array.from(
           new Set(data.attempts.map((a) => a.subject || "ไม่ระบุ"))
         );
@@ -31,22 +31,21 @@ export default function ActivityPage() {
         setLoading(false);
       }
     };
-
+ 
     fetchActivity();
   }, [session]);
-
+ 
   if (!session) {
     return (
       <p className="p-6 text-gray-600">กรุณาเข้าสู่ระบบเพื่อดูสถิติ</p>
     );
   }
-
+ 
   const filteredAttempts =
     selectedSubject === "all"
       ? stats.attempts
       : stats.attempts.filter((a) => a.subject === selectedSubject);
-
-  // แบ่งตาม lesson
+ 
   const lessonsMap = {};
   filteredAttempts.forEach((a) => {
     const lessonKey = a.lessonId || "ไม่ระบุบทเรียน";
@@ -57,22 +56,26 @@ export default function ActivityPage() {
       };
     lessonsMap[lessonKey].attempts.push(a);
   });
-
+ 
   return (
-    <SideLayout>
-      <div className="min-h-screen font-sans py-6">
-        <div className="flex items-center gap-4 px-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <MainNav />
+ 
+      {/* เนื้อหาหน้า */}
+      <div className="pt-6 px-6 max-w-screen-lg mx-auto">
+        <div className="flex items-center gap-4 mb-4">
           <h1 className="text-xl font-bold text-gray-800 tracking-tight">
             สถิติการทำแบบทดสอบ
           </h1>
         </div>
-
+ 
         {loading ? (
           <p className="p-6 text-gray-600">กำลังโหลดสถิติ...</p>
         ) : (
           <>
             {/* เลือกวิชา */}
-            <div className="mt-6 px-6">
+            <div className="mt-4 mb-6">
               <label className="font-semibold text-gray-700 mr-3">
                 เลือกวิชา:
               </label>
@@ -89,20 +92,18 @@ export default function ActivityPage() {
                 ))}
               </select>
             </div>
-
+ 
             {/* แยกตามบทเรียน */}
-            <div className="mt-8 px-6 space-y-8">
+            <div className="space-y-8">
               {Object.entries(lessonsMap).map(([lessonId, lessonData]) => {
                 const lessonAttempts = lessonData.attempts;
-
-                // แบ่งตาม chapter
                 const chaptersMap = {};
                 lessonAttempts.forEach((a) => {
                   const chapter = a.chapter || "ไม่ระบุบท";
                   if (!chaptersMap[chapter]) chaptersMap[chapter] = [];
                   chaptersMap[chapter].push(a);
                 });
-
+ 
                 return (
                   <div
                     key={lessonId}
@@ -113,7 +114,7 @@ export default function ActivityPage() {
                         บทเรียน: {lessonData.title}
                       </h2>
                     </div>
-
+ 
                     <div className="overflow-x-auto rounded-lg border border-gray-200">
                       <table className="min-w-full divide-y divide-gray-200 text-sm">
                         <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
@@ -123,57 +124,39 @@ export default function ActivityPage() {
                             <th className="py-3 px-4 text-center">ล่าสุด</th>
                             <th className="py-3 px-4 text-center">ต่ำสุด</th>
                             <th className="py-3 px-4 text-center">สูงสุด</th>
-                            <th className="py-3 px-4 text-center">
-                              วันเวลาที่ทำ
-                            </th>
+                            <th className="py-3 px-4 text-center">วันเวลาที่ทำ</th>
                             <th className="py-3 px-4 text-center">สถานะ</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 bg-white">
                           {Object.entries(chaptersMap).map(
                             ([chapter, attempts]) => {
-                              // group by unit
                               const unitsMap = {};
                               attempts.forEach((a) => {
                                 if (!unitsMap[a.unitId]) unitsMap[a.unitId] = [];
                                 unitsMap[a.unitId].push(a);
                               });
-
+ 
                               return (
                                 <Fragment key={chapter}>
                                   {Object.entries(unitsMap).map(
                                     ([unitId, unitAttempts], idx) => {
                                       const sortedAttempts = unitAttempts.sort(
-                                        (a, b) =>
-                                          a.attemptNumber - b.attemptNumber
+                                        (a, b) => a.attemptNumber - b.attemptNumber
                                       );
-
+ 
                                       const isFull = sortedAttempts.some(
-                                        (a) =>
-                                          a.score === a.totalQuestions
+                                        (a) => a.score === a.totalQuestions
                                       );
-
-                                      const attemptsCount =
-                                        sortedAttempts.length;
+ 
+                                      const attemptsCount = sortedAttempts.length;
                                       const latestScore =
-                                        sortedAttempts[
-                                          sortedAttempts.length - 1
-                                        ]?.score || 0;
-                                      const minScore = Math.min(
-                                        ...sortedAttempts.map((a) => a.score)
-                                      );
-                                      const maxScore = Math.max(
-                                        ...sortedAttempts.map((a) => a.score)
-                                      );
+                                        sortedAttempts[sortedAttempts.length - 1]?.score || 0;
+                                      const minScore = Math.min(...sortedAttempts.map((a) => a.score));
+                                      const maxScore = Math.max(...sortedAttempts.map((a) => a.score));
                                       const lastAttemptDate =
-                                        sortedAttempts[
-                                          sortedAttempts.length - 1
-                                        ]?.createdAt
-                                          ? new Date(
-                                              sortedAttempts[
-                                                sortedAttempts.length - 1
-                                              ].createdAt
-                                            ).toLocaleString("th-TH", {
+                                        sortedAttempts[sortedAttempts.length - 1]?.createdAt
+                                          ? new Date(sortedAttempts[sortedAttempts.length - 1].createdAt).toLocaleString("th-TH", {
                                               day: "numeric",
                                               month: "short",
                                               year: "2-digit",
@@ -181,41 +164,24 @@ export default function ActivityPage() {
                                               minute: "2-digit",
                                             })
                                           : "-";
-
+ 
                                       return (
-                                        <tr
-                                          key={unitId}
-                                          className="hover:bg-gray-50 transition"
-                                        >
+                                        <tr key={unitId} className="hover:bg-gray-50 transition">
                                           <td className="py-2 px-4 font-medium text-gray-800">
                                             {unitAttempts[0]?.unitTitle
                                               ? unitAttempts[0].unitTitle
                                               : `หน่วย ${idx + 1}`}
                                           </td>
-                                          <td className="py-2 px-4 text-center text-gray-600">
-                                            {attemptsCount}
-                                          </td>
-                                          <td className="py-2 px-4 text-center text-gray-600">
-                                            {latestScore}
-                                          </td>
-                                          <td className="py-2 px-4 text-center text-gray-600">
-                                            {minScore}
-                                          </td>
-                                          <td className="py-2 px-4 text-center text-gray-600">
-                                            {maxScore}
-                                          </td>
-                                          <td className="py-2 px-4 text-center text-gray-600">
-                                            {lastAttemptDate}
-                                          </td>
+                                          <td className="py-2 px-4 text-center text-gray-600">{attemptsCount}</td>
+                                          <td className="py-2 px-4 text-center text-gray-600">{latestScore}</td>
+                                          <td className="py-2 px-4 text-center text-gray-600">{minScore}</td>
+                                          <td className="py-2 px-4 text-center text-gray-600">{maxScore}</td>
+                                          <td className="py-2 px-4 text-center text-gray-600">{lastAttemptDate}</td>
                                           <td className="py-2 px-4 text-center">
                                             {isFull ? (
-                                              <span className="px-2 py-1 text-sm font-semibold rounded-full text-green-700">
-                                                สำเร็จ
-                                              </span>
+                                              <span className="px-2 py-1 text-sm font-semibold rounded-full text-green-700">สำเร็จ</span>
                                             ) : (
-                                              <span className="px-2 py-1 text-sm font-semibold rounded-full text-red-700">
-                                                ไม่สำเร็จ
-                                              </span>
+                                              <span className="px-2 py-1 text-sm font-semibold rounded-full text-red-700">ไม่สำเร็จ</span>
                                             )}
                                           </td>
                                         </tr>
@@ -236,6 +202,6 @@ export default function ActivityPage() {
           </>
         )}
       </div>
-    </SideLayout>
+    </div>
   );
 }
