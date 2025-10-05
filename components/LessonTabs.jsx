@@ -32,17 +32,6 @@ export default function LessonTabs({ activeTab, setActiveTab }) {
           >
             ฉบับล่าง
           </Link>
-
-          <Link
-              href="/lesson_pending"
-              onClick={() => setActiveTab("pending")}
-              className={`pb-1 cursor-pointer ${activeTab === "pending"
-                ? "border-b-2 border-purple-600 text-purple-600 font-medium"
-                : "text-gray-500 hover:text-black"
-                }`}
-            >
-              รออนุมัติ
-            </Link>
         </div>
       </div>
     </div>
