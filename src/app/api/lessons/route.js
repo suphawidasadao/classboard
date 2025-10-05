@@ -6,12 +6,6 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export const config = { api: { bodyParser: false } };
-
-async function notifyAdmin(lesson) {
-  console.log('ส่ง notification ไป admin:', lesson._id);
-}
-
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,7 +13,12 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
-    const role = session.user.role || "user"; // 🔹 สมมติว่ามี field role = "user" หรือ "admin"
+    const role = session.user.role || "user";
+
+    // ✅ จำกัดสิทธิ์เฉพาะครู/แอดมินเท่านั้น
+    if (role !== "teacher" && role !== "admin") {
+      return new Response(JSON.stringify({ error: 'Permission denied: only teachers can create lessons' }), { status: 403 });
+    }
 
     await connectMongoDB();
 
@@ -27,15 +26,13 @@ export async function POST(req) {
     const lessonsJSON = formData.get('lessons');
     const subject = formData.get('subject')?.toString().trim() || '';
 
-    // --- ตรวจสอบ status ---
     let status = formData.get('status')?.toString().trim().toLowerCase() || 'draft';
 
     if (role === "admin") {
       // 🔹 Admin สามารถ publish ได้เลย
-      if (!['draft', 'pending', 'published'].includes(status)) status = 'published';
-    } else {
-      // 🔹 User จำกัดแค่ draft หรือ pending เท่านั้น
-      if (!['draft', 'pending'].includes(status)) status = 'draft';
+      if (!['draft', 'published'].includes(status)) status = 'published';
+    } else if (role === "teacher") {
+      if (!['draft', 'published'].includes(status)) status = 'draft';
     }
 
     if (!lessonsJSON) {
@@ -100,8 +97,7 @@ export async function POST(req) {
 
     const createdLesson = await Lesson.create(lessonDoc);
 
-    // 🔹 เฉพาะ user → notify admin ถ้า pending
-    if (role === "user" && status === "pending") {
+    if (role === "teacher" && status === "pending") {
       await notifyAdmin(createdLesson);
     }
 

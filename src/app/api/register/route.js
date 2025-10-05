@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req) {
   try {
-    const { email, password } = await req.json();
-    console.log("📦 Received Data:", { email });
+    const { email, password, role, teacherName, school, teacherDetails } = await req.json();
+    console.log("📦 Received Data:", { email, role });
 
     if (typeof email !== "string" || typeof password !== "string") {
       throw new Error("❌ email และ password ต้องเป็น String");
@@ -19,13 +19,27 @@ export async function POST(req) {
       );
     }
 
+    if (role === "teacher") {
+      const schoolEmailPattern = /.+@.+\.(ac\.th|school\.go\.th)$/i; // ตัวอย่าง pattern ของอีเมลโรงเรียนไทย
+      if (!schoolEmailPattern.test(email)) {
+        return NextResponse.json(
+          { message: "สำหรับอาจารย์ กรุณาใช้อีเมลของโรงเรียน" },
+          { status: 400 }
+        );
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await connectMongoDB();
 
     const newUser = new User({
       email,
       password: hashedPassword,
-      role: email === "admin@gmail.com" ? "admin" : "user"
+      role: role || "student",
+      name: role === "teacher" ? (teacherName || "") : "",
+      teacherName: role === "teacher" ? (teacherName || "") : "",
+      school: role === "teacher" ? (school || "") : "",
+      teacherDetails: role === "teacher" ? (teacherDetails || "") : "",
     });
 
     console.log("✅ Saving User:", newUser);

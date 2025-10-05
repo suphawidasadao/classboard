@@ -8,9 +8,9 @@ import { connectMongoDB } from "../../../../lib/mongodb";
 export async function GET(req) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { 
-      status: 401, 
-      headers: { "Content-Type": "application/json" } 
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" }
     });
   }
 
@@ -18,12 +18,17 @@ export async function GET(req) {
 
   try {
     // ดึงบทเรียนของ user
-    const lessons = await Lesson.find({ creator: session.user.email }).lean();
+    // ดึงเฉพาะบทเรียนที่ publish แล้ว
+    const lessons = await Lesson.find({
+      creator: session.user.email,
+      status: "published"   // ✅ กรองเฉพาะ published
+    }).lean();
+
 
     if (!lessons || lessons.length === 0) {
-      return new Response(JSON.stringify({ lessons: [] }), { 
-        status: 200, 
-        headers: { "Content-Type": "application/json" } 
+      return new Response(JSON.stringify({ lessons: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
       });
     }
 
@@ -118,15 +123,15 @@ export async function GET(req) {
       };
     });
 
-    return new Response(JSON.stringify({ lessons: lessonsWithStats }), { 
-      status: 200, 
-      headers: { "Content-Type": "application/json" } 
+    return new Response(JSON.stringify({ lessons: lessonsWithStats }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
     });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: "Failed to fetch report" }), { 
-      status: 500, 
-      headers: { "Content-Type": "application/json" } 
+    return new Response(JSON.stringify({ error: "Failed to fetch report" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
     });
   }
 }
