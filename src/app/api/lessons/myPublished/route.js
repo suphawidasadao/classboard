@@ -13,11 +13,10 @@ export async function GET() {
 
     await connectMongoDB();
 
-    // ดึงเฉพาะบทเรียนที่สร้างโดย user และถูกอนุมัติ
     const lessons = await Lesson.find({
-      status: "approved",
+      status: "published",
       creator: session.user.email,
-    }).sort({ createdAt: 1 }); // เรียงตามลำดับส่งมาก่อน → หลัง
+    }).sort({ createdAt: -1 });
 
     return NextResponse.json({ lessons });
   } catch (error) {
