@@ -8,7 +8,7 @@ import { IoChevronDown } from "react-icons/io5";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaChartPie } from "react-icons/fa";
-import { FaHistory } from "react-icons/fa";
+import { IoMdAddCircleOutline } from "react-icons/io";
 
 export default function SideLayout({ children }) {
   const { data: session } = useSession();
@@ -34,7 +34,6 @@ export default function SideLayout({ children }) {
   const menuItems = [
     { title: "บทเรียนที่สร้าง", icon: <FaBook />, href: "/lesson_myPublished" },
     { title: "รายงาน", icon: <FaChartPie />, href: "/lesson_report" },
-    { title: "กิจกรรม", icon: <FaHistory />, href: "/lesson_activities" },
   ];
 
   return (
@@ -47,12 +46,15 @@ export default function SideLayout({ children }) {
           </Link>
         </div>
 
-        {session?.user?.email && (
+        {session?.user?.role === 'teacher' && (
           <Link
-            href={`/create_lesson/${session.user.id}`}
+            href={`/create_lessons`}
             className="w-full bg-[#2e003ee3] hover:bg-[#552c62] text-white py-2 rounded flex items-center justify-center"
           >
-            + สร้างบทเรียน
+            <span className="flex items-center space-x-2">
+              <IoMdAddCircleOutline className="text-lg" />
+              <span>สร้างบทเรียน</span>
+            </span>
           </Link>
         )}
 
