@@ -27,7 +27,7 @@ export default function LessonDetailPage() {
 
         const lessonObj = {
           title: firstLesson.title || "",
-          bookName: firstLesson.bookName || "-",
+          // bookName ถูกตัดออกแล้ว
           units: firstLesson.units || [],
           subject: lessonData.subject || "",
           status: lessonData.status || "",
@@ -61,7 +61,7 @@ export default function LessonDetailPage() {
               <div className="flex items-center space-x-2 text-base">
                 <span>วิชา: {lesson.subject}</span>
               </div>
-              <p className="text-gray-700 text-base">หนังสือ: {lesson.bookName || "-"}</p>
+              {/* ลบส่วนที่แสดงหนังสือออก */}
               <p className="text-gray-700 text-base">สถานะ: {lesson.status}</p>
               {lesson.status === "rejected" && (
                 <p className="text-red-600 text-base mt-2">
@@ -73,7 +73,10 @@ export default function LessonDetailPage() {
             <div className="text-gray-500 text-sm flex items-center gap-1">
               <FaCalendarDay />
               <span>
-                สร้างเมื่อ: {lesson.createdAt ? new Date(lesson.createdAt).toLocaleDateString("th-TH") : "-"}
+                สร้างเมื่อ:{" "}
+                {lesson.createdAt
+                  ? new Date(lesson.createdAt).toLocaleDateString("th-TH")
+                  : "-"}
               </span>
             </div>
           </div>
@@ -81,14 +84,20 @@ export default function LessonDetailPage() {
 
         <div className="space-y-6">
           {lesson.units?.map((unit, uIdx) => (
-            <div key={uIdx} className="bg-white p-6 rounded-lg border border-gray-300 shadow-sm">
+            <div
+              key={uIdx}
+              className="bg-white p-6 rounded-lg border border-gray-300 shadow-sm"
+            >
               <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-300 pb-3 mb-4">
                 {unit.title}
               </h2>
 
               <div className="space-y-6">
                 {unit.questions?.map((q, qIdx) => (
-                  <div key={qIdx} className="space-y-4 border-b border-gray-200 pb-4">
+                  <div
+                    key={qIdx}
+                    className="space-y-4 border-b border-gray-200 pb-4"
+                  >
                     <p className="text-lg font-semibold text-gray-800">
                       {qIdx + 1}. {q.questionText}
                     </p>
@@ -112,9 +121,17 @@ export default function LessonDetailPage() {
                             className={`w-4 h-4 rounded-full flex items-center justify-center
                               ${c.isCorrect ? "bg-green-600" : "bg-white border border-gray-300"}`}
                           >
-                            {c.isCorrect && <BsCheck className="text-white w-4 h-4" />}
+                            {c.isCorrect && (
+                              <BsCheck className="text-white w-4 h-4" />
+                            )}
                           </div>
-                          <span className={`text-sm ${c.isCorrect ? "text-green-700 font-semibold" : "text-gray-700"}`}>
+                          <span
+                            className={`text-sm ${
+                              c.isCorrect
+                                ? "text-green-700 font-semibold"
+                                : "text-gray-700"
+                            }`}
+                          >
                             {c.text}
                           </span>
                         </div>
