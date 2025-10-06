@@ -10,23 +10,28 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: false,
-      default: "",     
+      default: "",
     },
-    name: { 
+    name: {
       type: String,
       default: "",
     },
     role: {
       type: String,
-      default: "user",
+      enum: ["student", "teacher", "admin"],
+      default: "student",
     },
-    isVerified: {
-      type: Boolean,
-      default: false,
+    teacherName: {
+      type: String,
+      default: "",
     },
-    emailVerified: {
-      type: Boolean, 
-      default: false,
+    school: {
+      type: String,
+      default: "",
+    },
+    teacherDetails: {
+      type: String,
+      default: "",
     },
     resetToken: {
       type: String,
