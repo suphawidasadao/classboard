@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BsCheck2Square, BsFileEarmark } from 'react-icons/bs';
 import { BiSend } from 'react-icons/bi';
@@ -38,13 +38,24 @@ const createDefaultLesson = (lessonNumber) => ({
   units: [createDefaultUnit(1)],
 });
 
-
 export default function CreateLessonsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const [subject, setSubject] = useState('ภาษาอังกฤษ');
   const [lessons, setLessons] = useState([createDefaultLesson(1)]);
+
+  // 🚨 ตรวจสอบ role
+  useEffect(() => {
+    if (status === 'loading') return; // รอโหลด session
+    if (!session || session.user.role !== 'teacher') {
+      router.push('/mainpage'); // ถ้าไม่ใช่ teacher redirect
+    }
+  }, [session, status, router]);
+
+  if (status === 'loading' || !session || session.user.role !== 'teacher') {
+    return <p className="p-6">กำลังโหลด...</p>;
+  }
 
   // ➕ เพิ่มหน่วย
   const addNewUnit = (lessonIdx) => {
@@ -140,6 +151,7 @@ export default function CreateLessonsPage() {
     const formData = new FormData();
     formData.append('subject', subject);
     formData.append('status', 'pending'); // หรือ draft
+    formData.append('creator', session.user.email);
 
     const lessonsWithoutFile = lessons.map((lesson) => ({
       title: lesson.title,
@@ -168,7 +180,6 @@ export default function CreateLessonsPage() {
         });
       });
     });
-
 
     try {
       const res = await fetch('/api/lessons', { method: 'POST', body: formData });
@@ -189,8 +200,8 @@ export default function CreateLessonsPage() {
 
     const formData = new FormData();
     formData.append('subject', subject);
-    formData.append('status', 'draft'); // บอกว่าเป็นฉบับร่าง
-    formData.append('creator', session?.user?.email); // บันทึกผู้สร้าง
+    formData.append('status', 'draft'); 
+    formData.append('creator', session.user.email);
 
     const lessonsWithoutFile = lessons.map((lesson) => ({
       title: lesson.title,
@@ -206,7 +217,6 @@ export default function CreateLessonsPage() {
 
     formData.append("lessons", JSON.stringify(lessonsWithoutFile));
 
-    // แนบไฟล์จริง
     lessons.forEach((lesson, lIdx) => {
       if (lesson.coverImageFile) {
         formData.append(`lessons[${lIdx}][coverImage]`, lesson.coverImageFile);
@@ -221,7 +231,6 @@ export default function CreateLessonsPage() {
     });
 
     try {
-      // เรียก API เดียวกัน แต่ backend ต้องปรับให้ draft ไม่ไปหาแอดมิน
       const res = await fetch('/api/lessons', {
         method: 'POST',
         body: formData,
@@ -229,7 +238,7 @@ export default function CreateLessonsPage() {
 
       if (res.ok) {
         alert('บันทึกฉบับร่างสำเร็จ');
-        router.push('/lesson_drafts'); // หน้าเก็บ draft ของผู้สร้าง
+        router.push('/lesson_drafts');
       } else {
         const errorData = await res.json();
         alert('เกิดข้อผิดพลาดในการบันทึกฉบับร่าง: ' + (errorData.error || 'ไม่ทราบสาเหตุ'));
@@ -238,8 +247,6 @@ export default function CreateLessonsPage() {
       alert('เกิดข้อผิดพลาด: ' + error.message);
     }
   };
-
-
 
   return (
     <div className="bg-white min-h-screen">
@@ -267,7 +274,7 @@ export default function CreateLessonsPage() {
               className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition"
             >
               <BsFileEarmark className="text-lg" />
-              ฉบับล่าง
+              ฉบับร่าง
             </button>
 
             <button
@@ -281,7 +288,7 @@ export default function CreateLessonsPage() {
         </div>
       </nav>
 
-      {/* 🔹 LOOP แสดงบท */}
+      {/* 🔹 LOOP แสดงบทเรียน */}
       {lessons.map((lesson, lessonIdx) => (
         <div key={lessonIdx} className="max-w-4xl mx-auto mt-8 p-6 bg-gray-100 rounded-xl shadow space-y-8">
           
@@ -295,7 +302,6 @@ export default function CreateLessonsPage() {
                     alt={`หน้าปกบทที่ ${lessonIdx + 1}`}
                     className="w-32 h-32 object-cover rounded-xl shadow border"
                   />
-                  {/* ไอคอน Edit overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 hover:opacity-100 rounded-xl transition">
                     <FiEdit className="text-white text-4xl" />
                   </div>
@@ -306,7 +312,6 @@ export default function CreateLessonsPage() {
                 </div>
               )}
 
-              {/* Input ซ่อนอยู่ */}
               <input
                 type="file"
                 accept="image/*"
@@ -325,7 +330,6 @@ export default function CreateLessonsPage() {
 
           <h1 className="text-lg font-bold">บทที่ {lessonIdx + 1}</h1>
           
-          {/* แถวล่าง: ชื่อบทเรียน + หนังสืออ้างอิง */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">ชื่อบทเรียน</label>
@@ -363,10 +367,8 @@ export default function CreateLessonsPage() {
             <div key={unitIdx} className="bg-gray-200 p-4 rounded-xl space-y-6">
               <h2 className="text-base font-semibold">{unit.title}</h2>
 
-              {/* แสดงคำถาม */}
               {unit.questions.map((q, qIdx) => (
                 <div key={qIdx} className="bg-white p-4 rounded-xl shadow space-y-4">
-                  {/* คำถาม + รูป */}
                   <div className="flex gap-4">
                     {q.previewUrl && (
                       <img
@@ -393,7 +395,6 @@ export default function CreateLessonsPage() {
                     }}
                   />
 
-                  {/* ตัวเลือก */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {q.choices.map((choice, choiceIdx) => (
                       <div key={choice.id} className={`${choice.color} p-4 rounded-xl`}>
