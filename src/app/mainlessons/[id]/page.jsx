@@ -1,9 +1,11 @@
 "use client";
 import { FaArrowLeft, FaLock } from "react-icons/fa";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
+import { RxCross2 } from "react-icons/rx";
+import Image from "next/image";
+import { IoChevronDown } from "react-icons/io5";
  
 export default function LessonPage() {
   const { id: lessonId } = useParams();
@@ -17,8 +19,26 @@ export default function LessonPage() {
   // ✅ state สำหรับ popup alert
   const [showAlert, setShowAlert] = useState(false);
  
+  // ✅ state สำหรับ dropdown profile
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+ 
   const activeStyle = "bg-[#2e003e] text-white";
   const lockedStyle = "bg-gray-300 text-gray-500";
+ 
+  const profileImage =
+    session?.user?.image || "/default-profile.png"; // ใช้ default ถ้าไม่มีรูป
+ 
+  // ปิด dropdown เมื่อคลิกนอกกล่อง
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
  
   const fetchProgress = async (lessonData) => {
     if (!lessonData || !session?.user) return;
@@ -81,7 +101,6 @@ export default function LessonPage() {
     fetchLesson();
   }, [lessonId, session?.user]);
  
-  // อัปเดต progress แบบ realtime
   useEffect(() => {
     const handler = () => fetchProgress(lesson);
     window.addEventListener("updateProgress", handler);
@@ -89,24 +108,24 @@ export default function LessonPage() {
   }, [lesson]);
  
   if (loading)
-  return (
-    <div className="flex items-center justify-center h-screen bg-[#f2f2f2]">
-      <div className="w-12 h-12 border-4 border-gray-300 border-t-[#2e003e] rounded-full animate-spin"></div>
-    </div>
-  );
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#f2f2f2]">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-[#2e003e] rounded-full animate-spin"></div>
+      </div>
+    );
  
   if (!lesson) return <div className="p-10 text-gray-500">ไม่พบบทเรียน</div>;
  
   const handleUnitClick = (unit, idx, lessonItem) => {
     const prevUnit = idx > 0 ? lessonItem.units[idx - 1] : null;
-    const prevCompleted = !prevUnit || (progress[prevUnit._id]?.completed || false);
+    const prevCompleted =
+      !prevUnit || (progress[prevUnit._id]?.completed || false);
  
     if (!prevCompleted) {
-      setShowAlert(true); // ✅ เปิด popup
+      setShowAlert(true);
       return;
     }
  
-    // ส่ง subject ไป UnitQuizPage ผ่าน query string
     router.push(
       `/mainlessons/${lessonId}/unit/${unit._id}?callback=updateProgress&subject=${encodeURIComponent(
         lesson.subject || "ไม่ระบุ"
@@ -117,21 +136,58 @@ export default function LessonPage() {
   return (
     <div className="min-h-screen bg-[#f2f2f2] font-sans text-gray-800">
       {/* Navbar */}
-      <div className="flex items-center justify-between px-16 py-[17px] bg-white border-b border-gray-300 shadow-sm">
-        <button
-          type="button"
-          disabled
-          className="border border-gray-300 px-10 py-2 rounded text-sm bg-gray-100 text-gray-700 shadow-sm"
-        >
-          วิชา: {lesson.subject || "ไม่ระบุ"}
-        </button>
-        {session?.user && (
-          <Link
-            href="/lesson_myPublished"
-            className="bg-[#2e003e] hover:bg-[#552c62] text-white text-sm px-4 py-2 rounded-md"
+      <div className="flex items-center justify-between px-16 py-[10px] bg-white border-b border-gray-300 shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/mainpage")}
+            className="flex items-center gap-2 text-gray-700 hover:text-[#2e003e] transition"
           >
-            {session.user.email.split("@")[0]}'s Dashboard
-          </Link>
+            <RxCross2 className="text-xl" />
+          </button>
+ 
+          <button
+            type="button"
+            disabled
+            className="border border-gray-300 px-10 py-2 rounded text-sm bg-gray-100 text-gray-700 shadow-sm"
+          >
+            วิชา: {lesson.subject || "ไม่ระบุ"}
+          </button>
+        </div>
+ 
+        {/* ✅ แทนส่วน Dashboard ด้วย dropdown profile */}
+        {session?.user && (
+          <div
+            className="flex items-center cursor-pointer relative"
+            ref={dropdownRef}
+          >
+            <div
+              className="flex items-center border border-gray-300 rounded-full p-1"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-300">
+                <Image
+                  src={profileImage}
+                  alt={session?.user?.name || "Profile"}
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover border border-gray-300"
+                  priority
+                />
+              </div>
+              <IoChevronDown className="text-xl text-gray-700 ml-1" />
+            </div>
+ 
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-20 w-32 bg-white shadow-lg rounded-md border z-50 text-xs">
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                >
+                  ออกจากระบบ
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
  
@@ -143,7 +199,6 @@ export default function LessonPage() {
               {lessonItem.title || "ไม่มีชื่อบท"}
             </h2>
  
-            {/* หน่วย */}
             <div className="flex justify-center gap-6 flex-wrap mt-12">
               {lessonItem.units.map((unit, idx) => {
                 const currentUnit = progress[unit._id] || {
@@ -153,7 +208,8 @@ export default function LessonPage() {
                   completed: false,
                 };
                 const prevUnit = idx > 0 ? lessonItem.units[idx - 1] : null;
-                const prevCompleted = !prevUnit || (progress[prevUnit._id]?.completed || false);
+                const prevCompleted =
+                  !prevUnit || (progress[prevUnit._id]?.completed || false);
                 const isUnlocked = prevCompleted;
                 const unitStyle = isUnlocked ? activeStyle : lockedStyle;
  
@@ -197,12 +253,13 @@ export default function LessonPage() {
               &times;
             </button>
  
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">ไม่สามารถเข้าได้</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              ไม่สามารถเข้าได้
+            </h3>
             <p className="text-gray-600 mb-4">ต้องทำหน่วยก่อนหน้าก่อน</p>
           </div>
         </div>
       )}
- 
     </div>
   );
 }
