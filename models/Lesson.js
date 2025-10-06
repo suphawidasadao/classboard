@@ -32,8 +32,7 @@ const UnitSchema = new mongoose.Schema({
 
 const LessonItemSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  bookName: { type: String, default: "" },
-  coverImage: { type: String, default: "" },
+  coverImage: { type: String, default: "/default_cover.svg" },
   units: {
     type: [UnitSchema],
     required: true,
